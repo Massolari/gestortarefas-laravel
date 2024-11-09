@@ -29,19 +29,30 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if (Schema::hasColumns('tasks', ['is_running','elapsed_time'])) {
-            $taskNameGlobal = TaskModel::select(['name', 'tasklist_id'])
-                ->where('is_running', '1')->first();
-    
-            if ($taskNameGlobal) {
-                $listNameGlobal = TasklistModel::select('name')
-                    ->where('id', $taskNameGlobal->tasklist_id)
-                    ->first();
-            }
+
+            $task = TaskModel::select(['name', 'tasklist_id'])
+                ->where('is_running', '1')->first() ?? "";
+            
+            $list = !empty($task->tasklist_id)
+                ? TasklistModel::select('name')
+                    ->where('id', $task->tasklist_id)
+                    ->first() 
+                : "";
+
+            $taskNameGlobal = $task->name ?? "";
+            $listNameGlobal = $list->name ?? "";
 
             View::share([
-                'taskNameGlobal' => $taskNameGlobal->name ?? "",
-                'listNameGlobal' => $listNameGlobal->name ?? "",
+                'taskNameGlobal' => $taskNameGlobal,
+                'listNameGlobal' => $listNameGlobal,
             ]);
+
+            return;
         }
+
+        View::share([
+            'taskNameGlobal' => "",
+            'listNameGlobal' => "",
+        ]);
     }
 }
