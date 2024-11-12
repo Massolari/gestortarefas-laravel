@@ -54,7 +54,7 @@
 
                             <div class="container-fluid d-flex justify-content-center mb-2">
                                 <div class="row mt-2">
-                                    <div class="col-4">
+                                    <div class="btn-group">
                                         {{-- button to edit a tasks list --}}
                                         <button class="btn btn-info" data-bs-toggle="modal"
                                             data-bs-target="#edit_tasklist-{{ $list['id'] }}"
@@ -70,13 +70,9 @@
                                             'list_name' => $list['name'],
                                             'description' => $list['description'],
                                         ])
-                                    </div>
-                                    <div class="col-4">
                                         {{-- visualizar a lista de tarefas --}}
                                         <a href="{{ route('taskWithList.search', $list['id']) }}" class="btn btn-success"
                                             title="Visualizar lista de tarefas."><i class="bi bi-eye text-dark"></i></a>
-                                    </div>
-                                    <div class="col-4">
                                         <button class="btn btn-danger" data-bs-toggle="modal"
                                             data-bs-target="#modalDeleteConfirm-{{ $list['id'] }}"
                                             title="Deletar a lista de tarefas."><i

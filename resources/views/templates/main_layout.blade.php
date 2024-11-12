@@ -27,6 +27,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ asset('assets/scripts/script.js') }}"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="{{ asset('assets/moment/moment.js') }}"></script>
 </body>
 
 </html>

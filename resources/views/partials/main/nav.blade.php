@@ -13,12 +13,9 @@
         </div>
     
         <div class="col-auto d-none d-sm-none d-md-none d-lg-block">
-            <span><a href="{{ url()->previous() }}"
-                class="btn btn-dark link-underline link-underline-opacity-0 link-opacity-50-hover">Voltar</a></span>
-            <span><a href="{{ route('task.show') }}"
-                class="btn btn-dark link-underline link-underline-opacity-0 link-opacity-50-hover">Tarefas</a></span>
-            <span><a href="{{ route('tasklist.show') }}"
-                class="btn btn-dark link-underline link-underline-opacity-0 link-opacity-50-hover">Listas</a></span>
+            <span><a href="{{ url()->previous() }}" class="btn btn-dark link-underline link-underline-opacity-0 link-opacity-50-hover">Voltar</a></span>
+            <span><a href="{{ route('task.show') }}" class="btn btn-dark link-underline link-underline-opacity-0 link-opacity-50-hover">Tarefas</a></span>
+            <span><a href="{{ route('tasklist.show') }}" class="btn btn-dark link-underline link-underline-opacity-0 link-opacity-50-hover">Listas</a></span>
         </div>
                 
         <div class="col-auto">
@@ -31,9 +28,22 @@
 
     <div class="row mb-2">
         <div class="col-auto d-flex justify-content-start" id="actual_task_running_container">
-            <div class="d-flex align-items-center justify-content-center rounded shadow" role="alert" id="actual_task_running_message">
+            <div class="d-flex align-items-center justify-content-center rounded shadow" 
+                    role="alert" 
+                    id="actual_task_running_message">
                 @if ($taskNameGlobal)
-                    <span class="bg-success py-1 pe-2 rounded" id="btnMessageRunningTask"><i class="bi bi-stopwatch ms-2 me-1"></i><em><strong>{{ $taskNameGlobal }}</strong> da lista <strong>{{ $listNameGlobal }}</strong></em></span>
+                    <a href="{{ !empty($listIdGlobal) ? route('task.search', $listIdGlobal) : route('task.show') }}" 
+                        class="btn btn-success py-1 pe-3 rounded shadow" 
+                        id="btnMessageRunningTask">
+                        <i class="bi bi-stopwatch me-1"></i>
+                        <em>
+                            @if (!empty($listNameGlobal))
+                                <strong>{{ $taskNameGlobal }}</strong> da lista <strong>{{ $listNameGlobal }}</strong>
+                            @else
+                                <strong>{{ $taskNameGlobal }}</strong></strong>
+                            @endif
+                        </em>
+                    </a>
                 @endif
             </div>
         </div>

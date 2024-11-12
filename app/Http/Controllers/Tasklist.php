@@ -14,15 +14,25 @@ use function PHPUnit\Framework\isNull;
 
 class Tasklist extends Controller
 {
+    /**
+     * initial route of task lists
+     *
+     * @return void
+     */
     public function index()
     {
         static::checkAuthAndRedirect();
         return redirect()->route('tasklist.show');
     }
 
+    /**
+     * get all lists
+     *
+     * @param int|null $task_id
+     * @return void
+     */
     public function getTasklists($task_id = null)
     {
-
         $task = TaskModel::find($task_id);
         $allTasklists = TasklistModel::where('user_id', Auth::user()->id)->orderBy('created_at', 'DESC')->get();
 
@@ -44,9 +54,13 @@ class Tasklist extends Controller
         return $options;
     }
 
+    /**
+     * show all lists
+     *
+     * @return void
+     */
     public function showTasklist()
     {
-
         static::checkAuthAndRedirect();
 
         $tasklist = TasklistModel::where('user_id', Auth::user()->id)->first();
@@ -74,15 +88,26 @@ class Tasklist extends Controller
         return view('pages.tasklist', $data);
     }
 
-    public function storeTasklistGet()
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        } else {
-            return back();
-        }
-    }
+    /**
+     * i don't know
+     *
+     * @return void
+     */
+    // public function storeTasklistGet()
+    // {
+    //     if (!Auth::check()) {
+    //         return redirect()->route('login');
+    //     } else {
+    //         return back();
+    //     }
+    // }
 
+    /**
+     * store a new list
+     *
+     * @param Request $request
+     * @return void
+     */
     public function storeTasklist(Request $request)
     {
         $request->validate([
@@ -110,6 +135,12 @@ class Tasklist extends Controller
         return redirect()->route('tasklist.index');
     }
 
+    /**
+     * edit a list
+     *
+     * @param Request $request
+     * @return void
+     */
     public function editTasklist(Request $request)
     {
         $request->validate([
@@ -137,7 +168,13 @@ class Tasklist extends Controller
         return redirect()->route('tasklist.show');
     }
 
-    public function deleteTasklist($id)
+    /**
+     * delete a list
+     *
+     * @param int $id
+     * @return void
+     */
+    public function deleteTasklist(int $id)
     {
         try {
             TaskModel::where('tasklist_id', $id)
@@ -152,7 +189,13 @@ class Tasklist extends Controller
         return back();
     }
 
-    public function searchTasklist($search = null)
+    /**
+     * search a some lists
+     *
+     * @param string|null $search
+     * @return void
+     */
+    public function searchTasklist(string|null $search = null)
     {
         $tasklist = TasklistModel::where('user_id', Auth::user()->id)->first();
 
@@ -170,7 +213,6 @@ class Tasklist extends Controller
 
         $tasklists = [];
 
-        // get tasks
         if ($search) {
             $allTasklists = TasklistModel::where('user_id', Auth::user()->id)
                 ->where(function ($query) use ($search) {
@@ -203,9 +245,13 @@ class Tasklist extends Controller
         return view('pages.tasklist', $data);
     }
 
+    /**
+     * get all lists
+     *
+     * @return void
+     */
     private static function getLists()
     {
-        // return UserModel::find(Auth::user()->id);
         $tasklists = [];
         $allTasklists = TasklistModel::where('user_id', Auth::user()->id)
             ->orderBy('created_at', 'DESC')->get();

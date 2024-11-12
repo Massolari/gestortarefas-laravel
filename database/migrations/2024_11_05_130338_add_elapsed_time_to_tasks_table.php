@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->integer('elapsed_time')->unsigned()->default(0);
-            $table->boolean('is_running')->default(false);
+            $table->timestamp('started_at')->nullable()->default(null);
         });
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->dropColumn('elapsed_time');
-            $table->dropColumn('is_running');
+            $table->dropColumn('started_at');
         });
     }
 };

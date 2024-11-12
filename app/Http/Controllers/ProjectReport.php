@@ -7,9 +7,16 @@ use App\Models\TaskModel;
 use App\Models\UserModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectReport extends Controller
 {
+    /**
+     * format task elapsed time form humans
+     *
+     * @param integer $seconds
+     * @return void
+     */
     private function formatTaskTime(int $seconds)
     {
         $hours = floor($seconds / 3600);
@@ -26,33 +33,39 @@ class ProjectReport extends Controller
         return "$hours:$seconds:$seconds";
     }
 
+    /**
+     * Download PDF of report
+     *
+     * @param Request $request
+     * @return void
+     */
     public function downloadPDF(Request $request)
     {
         $request->validate([
             "client_name" => "required|min:5",
-            "list_id" => "required|int|min:1",
         ]);
 
-        $taskList = TasklistModel::where('id', $request->input('list_id'))->first();
+        $listIdOrNull = $request->input('list_id') ?? null;
 
         $tasks = TaskModel::where(
             'tasklist_id',
-            $taskList->id
-        )->get();
+            $listIdOrNull,
+        )->orderBy('created_at','desc')->get();
 
-        $user = UserModel::where('id', $taskList->user_id)->first();
+        $user = UserModel::find(Auth::user()->id);
         
         $totalTimeWorked = 0;
+
         foreach ($tasks as $task) {
             $totalTimeWorked += $task->elapsed_time;
         }
+
         $totalTimeWorked = $this->formatTaskTime($totalTimeWorked);
         
         foreach ($tasks as $task) {
             $task->elapsed_time = $this->formatTaskTime($task->elapsed_time);
             $task->status = $this->getStatusInPortuguesse($task->status);
         }
-
 
         $data = [
             'title' => 'Resumo do relatório',
@@ -72,11 +85,18 @@ class ProjectReport extends Controller
         return $pdf->download('relatorio_' . $request->input('client_name') . '.pdf');
     }
 
+    /**
+     * translate staus of tasks to portuguese
+     *
+     * @param string $status
+     * @return void
+     */
     private function getStatusInPortuguesse(string $status)
     {
         $status_collection = [
             'new' => 'Não iniciada',
             'in_progress' => 'Em progresso',
+            'not_started' => 'Não concluída',
             'cancelled' => 'Cancelada',
             'completed' => 'Concluída',
         ];
