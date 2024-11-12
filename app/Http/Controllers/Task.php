@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\TasklistModel;
 use App\Models\TaskModel;
 use Exception;
+use Illuminate\Console\View\Components\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -69,10 +72,12 @@ class Task extends Controller
      *
      * @param integer|null|null $listId
      * @param string $filter
-     * @return void
+     * @return RedirectResponse
      */
-    public function tasks(int|null $listId = null, string $filter = 'all')
-    {
+    public function tasks(
+        int|null $listId = null, 
+        string $filter = 'all'
+    ) {
         
         if (!Auth::check()) {
             return redirect()->route('login');
@@ -103,10 +108,12 @@ class Task extends Controller
      * Store a new task
      *
      * @param Request $request
-     * @return void
+     * @return RedirectResponse
      */
-    public function newTask(Request $request, $list_id = null)
-    {
+    public function newTask(
+        Request $request, 
+        $list_id = null
+    ): RedirectResponse {
         $request->validate([
             'name' => 'required|unique:tasks|min:3|max:200',
             'description' => 'max:1000',
@@ -135,9 +142,9 @@ class Task extends Controller
      * edit a task
      *
      * @param Request $request
-     * @return void
+     * @return RedirectResponse
      */
-    public function editTask(Request $request)
+    public function editTask(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'required|min:3|max:200',
@@ -174,7 +181,7 @@ class Task extends Controller
      * @param $id
      * @return void
      */
-    public function deleteTask(int $taskId)
+    public function deleteTask(int $taskId): RedirectResponse
     {
         try {
             TaskModel::find($taskId)->delete();
@@ -189,10 +196,12 @@ class Task extends Controller
      * search task based a text
      *
      * @param string $search
-     * @return void
+     * @return RedirectResponse
      */
-    public function searchTask($listId = null, $search = 'all')
-    {
+    public function searchTask(
+        $listId = null, 
+        $search = 'all'
+    ) {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
@@ -228,10 +237,12 @@ class Task extends Controller
      * search task based a text
      *
      * @param string $search
-     * @return void
+     * @return RedirectResponse
      */
-    public function filterTask($listId = null, $filter = 'all')
-    {
+    public function filterTask(
+        $listId = null, 
+        $filter = 'all'
+    ): RedirectResponse {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
@@ -264,10 +275,12 @@ class Task extends Controller
      *
      * @param $taskId
      * @param Request $request
-     * @return void
+     * @return RedirectResponse
      */
-    public function setCommentaryTask($taskId, Request $request)
-    {
+    public function setCommentaryTask(
+        int $taskId, 
+        Request $request
+    ): RedirectResponse {
         $newCommentary = $request->input('commentary');
 
         try {
@@ -288,9 +301,12 @@ class Task extends Controller
      *
      * @param $tasklist_id
      * @param string $filter
+     * @return array
      */
-    private static function getTaskByFilter($tasklist_id = null, string $filter = 'all')
-    {
+    private static function getTaskByFilter(
+        int|null $tasklist_id = null, 
+        string $filter = 'all'
+    ): array {
         $tasks = [];
         $allTasks = [];
 
@@ -322,7 +338,6 @@ class Task extends Controller
                 'tasklist_id' => $task->tasklist_id,
                 'commentary' => $task->commentary,
                 'user_id' => Auth::user()->id,
-                // 'task_actions' => $link_edit . $link_delete,
             ];
         }
 
@@ -335,10 +350,13 @@ class Task extends Controller
      * @param int|null $userId
      * @param int|null $listId
      * @param string $search
-     * @return void
+     * @return array
      */
-    private static function getTasksBySearch($userId = null, $listId = null, $search = 'all')
-    {
+    private static function getTasksBySearch(
+        int|null $userId = null, 
+        int|null $listId = null, 
+        string $search = 'all'
+    ): array {
         $query = TaskModel::where('user_id', $userId)
             ->where('tasklist_id', $listId)
             ->orderBy('created_at', 'DESC')
@@ -387,6 +405,8 @@ class Task extends Controller
         if (key_exists($status, $status_collection)) {
             return $status_collection[$status];
         }
+
+        return "Desconhecido";
     }
 
     /**
@@ -408,6 +428,8 @@ class Task extends Controller
         if (key_exists($status, $status_collection)) {
             return $status_collection[$status];
         }
+
+        return "Desconhecido";
     }
 
     /**
