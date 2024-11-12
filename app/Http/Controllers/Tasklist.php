@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\TasklistModel;
 use App\Models\TaskModel;
-use App\Models\UserModel;
 use Exception;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,23 +16,13 @@ use function PHPUnit\Framework\isNull;
 class Tasklist extends Controller
 {
     /**
-     * initial route of task lists
+     * Get all task lists and format them as HTML select options
+     * Used to populate task list dropdown in task forms
      *
-     * @return void
+     * @param int|null $task_id The ID of the task to get lists for
+     * @return string HTML string containing select options for task lists
      */
-    public function index()
-    {
-        static::checkAuthAndRedirect();
-        return redirect()->route('tasklist.show');
-    }
-
-    /**
-     * get all lists
-     *
-     * @param int|null $task_id
-     * @return void
-     */
-    public function getTasklists($task_id = null)
+    public function getTasklists(?int $task_id = null): string
     {
         $task = TaskModel::find($task_id);
         $allTasklists = TasklistModel::where('user_id', Auth::user()->id)->orderBy('created_at', 'DESC')->get();
@@ -55,25 +46,19 @@ class Tasklist extends Controller
     }
 
     /**
-     * show all lists
-     *
-     * @return void
+     * Show all task lists for the authenticated user
+     * Gets the user's task lists and calculates their level/experience
+     * based on completed tasks
+     * 
+     * @return View
      */
-    public function showTasklist()
+    public function showTasklist(): View
     {
-        static::checkAuthAndRedirect();
+        if (!Auth::check()) return redirect()->route('login');
 
-        $tasklist = TasklistModel::where('user_id', Auth::user()->id)->first();
-
-        $amountOfCompletedTasks = 0;
-
-        try {
-            $amountOfCompletedTasks = TaskModel::where('tasklist_id', $tasklist->id)
-                ->where('status', 'completed')
-                ->count();
-        } catch (Exception $exception) {
-            $amountOfCompletedTasks = 0;
-        }
+        $amountOfCompletedTasks = TaskModel::where('user_id', Auth::user()->id)
+            ->where('status', 'completed')
+            ->count();
 
         ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
 
@@ -89,59 +74,41 @@ class Tasklist extends Controller
     }
 
     /**
-     * i don't know
-     *
-     * @return void
-     */
-    // public function storeTasklistGet()
-    // {
-    //     if (!Auth::check()) {
-    //         return redirect()->route('login');
-    //     } else {
-    //         return back();
-    //     }
-    // }
-
-    /**
-     * store a new list
+     * Store a new task list
      *
      * @param Request $request
-     * @return void
+     * @return RedirectResponse
      */
-    public function storeTasklist(Request $request)
+    public function storeTasklist(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'required|unique:tasklists|min:3|max:200',
             'description' => 'nullable|max:1000',
         ], [
             'name.required' => 'O campo é obrigatório.',
-            'name.unique' => 'A lista de tarefas já existe, use outro nome.',
-            'name.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'name.max' => 'O campo deve ter no máximo :max caracteres.',
-            'description.max' => 'O campo deve ter no máximo :max caracteres.',
+            'name.unique' => 'A lista de tarefas já existe.',
+            'name.min' => 'Mínimo :min caracteres.',
+            'name.max' => 'Máximo :max caracteres.',
+            'description.max' => 'Máximo :max caracteres.',
         ]);
-
-        // get form data
-        $name = $request->input('name');
-        $description = $request->input('description');
 
         TasklistModel::create([
             'user_id' => Auth::user()->id,
-            'name' => $name,
-            'description' => $description,
-            'created_at' => date('Y-m-d H:i:s'),
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'created_at' => now(),
         ]);
 
-        return redirect()->route('tasklist.index');
+        return redirect()->route('tasklist.show');
     }
 
     /**
-     * edit a list
+     * Edit a task list
      *
      * @param Request $request
-     * @return void
+     * @return RedirectResponse
      */
-    public function editTasklist(Request $request)
+    public function editTasklist(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'min:3|max:200',
@@ -172,105 +139,71 @@ class Tasklist extends Controller
      * delete a list
      *
      * @param int $id
-     * @return void
+     * @return RedirectResponse
      */
-    public function deleteTasklist(int $id)
+    public function deleteTasklist(int $id): RedirectResponse
     {
-        try {
-            TaskModel::where('tasklist_id', $id)
-                ->delete();
-
-            TasklistModel::where('id', $id)
-                ->delete();
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-
+        TaskModel::where('tasklist_id', $id)->delete();
+        TasklistModel::where('id', $id)->delete();
         return back();
     }
 
     /**
-     * search a some lists
+     * Search task lists
      *
      * @param string|null $search
-     * @return void
+     * @return View
      */
-    public function searchTasklist(string|null $search = null)
+    public function searchTasklist(?string $search = null): View
     {
-        $tasklist = TasklistModel::where('user_id', Auth::user()->id)->first();
-
-        $amountOfCompletedTasks = 0;
-
-        try {
-            $amountOfCompletedTasks = TaskModel::where('tasklist_id', $tasklist->id)
-                ->where('status', 'completed')
-                ->count();
-        } catch (Exception $exception) {
-            $amountOfCompletedTasks = 0;
-        }
+        $amountOfCompletedTasks = TaskModel::where('user_id', Auth::user()->id)
+            ->where('status', 'completed')
+            ->count();
 
         ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
 
-        $tasklists = [];
-
         if ($search) {
-            $allTasklists = TasklistModel::where('user_id', Auth::user()->id)
+            $tasklists = TasklistModel::where('user_id', Auth::user()->id)
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%' . $search . '%')
-                        ->orWhere(DB::raw('lower(description)'), 'like', '%' . strtolower($search) . '%')
-                        ->orderBy('created_at', 'DESC');
-                })->whereNull('deleted_at')
-                ->get();
-
-            foreach ($allTasklists as $list) {
-
-                $tasklists[] = [
-                    'id' => $list['id'],
-                    'name' => $list['name'],
-                    'description' => $list['description'],
-                ];
-            }
+                        ->orWhere(DB::raw('lower(description)'), 'like', '%' . strtolower($search) . '%');
+                })
+                ->orderBy('created_at', 'DESC')
+                ->whereNull('deleted_at')
+                ->get()
+                ->map(fn($list) => [
+                    'id' => $list->id,
+                    'name' => $list->name, 
+                    'description' => $list->description
+                ])
+                ->toArray();
         } else {
-            $tasklists = Tasklist::getLists();
+            $tasklists = self::getLists();
         }
 
-        $data = [
+        return view('pages.tasklist', [
             'title' => 'Listas de Tarefas',
             'user_name' => Auth::user()->name,
             'lists' => $tasklists,
             'user_level' => $lvl,
             'user_experience' => $exp,
-        ];
-
-        return view('pages.tasklist', $data);
+        ]);
     }
-
     /**
-     * get all lists
+     * Get all task lists for the authenticated user
      *
-     * @return void
+     * @return array Returns array containing task lists with id, name and description
      */
-    private static function getLists()
+    private static function getLists(): array
     {
-        $tasklists = [];
-        $allTasklists = TasklistModel::where('user_id', Auth::user()->id)
-            ->orderBy('created_at', 'DESC')->get();
-
-        foreach ($allTasklists as $list) {
-            $tasklists[] = [
+        return TasklistModel::where('user_id', Auth::user()->id)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->map(fn($list) => [
                 'id' => $list->id,
                 'name' => $list->name,
                 'description' => $list->description,
-            ];
-        }
-
-        return $tasklists;
-    }
-
-    private static function checkAuthAndRedirect()
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
+            ])
+            ->toArray();
     }
 }
