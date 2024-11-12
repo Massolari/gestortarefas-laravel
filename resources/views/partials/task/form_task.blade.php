@@ -83,36 +83,34 @@
                     {{-- task status --}}
                     <label class="mt-3" for="status">Escolha um status:</label>
                     @if ($type == 'edit')
-
-                        <input type="hidden" name="status" id="status_hidden" value="{{ old('status', $status) }}">
                         <div>
                             <select name="status" id="status" class="form-select">
-                                <option value="new" {{ old('status', $status) == 'Nova' ? 'selected' : '' }} disabled>
+                                <option value="new" {{ $status == 'new' ? 'selected' : '' }}>
                                     Nova
                                 </option>
                                 
                                 <option value="in_progress" 
                                         id="in_progress_{{ $task_id }}"
-                                        {{ old('status', $status) == 'Em progresso' ? 'selected' : '' }} 
-                                        {{ $status == 'Em progresso' ? '' : 'disabled' }}
+                                        {{ $status == 'in_progress' ? 'selected' : '' }} 
+                                        {{ $status == 'in_progress' ? '' : 'disabled' }}
                                 >Em progresso</option>
                                 
                                 <option value="not_started" 
                                         id="not_started_{{ $task_id }}"
-                                        {{ old('status', $status) == 'Não iniciada' ? 'selected' : '' }} 
-                                        {{ $status == 'Em progresso' ? 'disabled' : '' }}
+                                        {{ $status == 'not_started' ? 'selected' : '' }} 
+                                        {{ $status == 'in_progress' ? 'disabled' : '' }}
                                 >Não iniciada</option>
                                 
                                 <option value="cancelled" 
                                         id="cancelled_{{ $task_id }}"
-                                        {{ old('status', $status) == 'Cancelada' ? 'selected' : '' }} 
-                                        {{ $status == 'Em progresso' || $status == 'Concluída' ? 'disabled' : '' }}
+                                        {{ $status == 'cancelled' ? 'selected' : '' }} 
+                                        {{ $status == 'in_progress' || $status == 'completed' ? 'disabled' : '' }}
                                 >Cancelada</option>
                                 
                                 <option value="completed" 
                                         id="completed_{{ $task_id }}"
-                                        {{ old('status', $status) == 'Concluída' ? 'selected' : '' }} 
-                                        {{ $status == 'Em progresso' || $status == 'Cancelada' ? 'disabled' : '' }}
+                                        {{ $status == 'completed' ? 'selected' : '' }} 
+                                        {{ $status == 'in_progress' || $status == 'cancelled' ? 'disabled' : '' }}
                                 >Concluída</option>
                             </select>
                     

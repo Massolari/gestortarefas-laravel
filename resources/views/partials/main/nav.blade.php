@@ -26,7 +26,7 @@
         </div> 
     </div>
 
-    <div class="row mb-2">
+    <div class="row mb-2 pb-2">
         <div class="col-auto d-flex justify-content-start" id="actual_task_running_container">
             <div class="d-flex align-items-center justify-content-center rounded shadow" 
                     role="alert" 

@@ -15,11 +15,15 @@
 </head>
 
 <body>
+    @include('partials.visitant.nav')
+
     <main class="d-flex flex-column min-vh-100">
         @yield('content')
         <script src="{{ asset('assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ asset('assets/scripts/script.js') }}"></script>
     </main>
+
+    @include('partials.main.footer')
 </body>
 
 </html>

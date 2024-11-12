@@ -1,25 +1,22 @@
 @extends('templates.main_layout')
 @section('content')
-    @include('partials.main.nav')
+
     <div class="row mx-2 mb-auto">
         <div class="col col-md-6 col-sm-12 mb-4">
             <ul class="list-group">
                 <li class="text-white list-group-item text-center">
                     <div class="d-flex justify-content-evenly">
                         <b class="text-center mx-auto">Tarefas sem lista</b>
-                        <a class="link-underline link-underline-opacity-0 link-opacity-50-hover"
-                            href="{{ route('task.show') }}"><em>Acessar</em></a>
+                        <a class="link-underline link-underline-opacity-0 link-opacity-50-hover" href="{{ route('task.show') }}"><em>Acessar</em></a>
                     </div>
                 </li>
                 @if (sizeof($tasks) > 0)
                     @foreach ($tasks as $task)
-                        <a class="text-info list-group-item list-group-item-action" data-bs-toggle="modal"
-                            data-bs-target="#task-resume-{{ $task->id }}">
+                        <a class="text-info list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#task-resume-{{ $task->id }}">
                             <div class="d-flex justify-content-between">
                                 <div class="text-info text-start text-truncate col-6">{{ $task->name }}</div>
                                 @if (isset($task->description))
-                                    <div class="text-white text-truncate col-4 text-end">{{ $task->description }}
-                                    </div>
+                                    <div class="text-white text-truncate col-4 text-end">{{ $task->description }}</div>
                                 @else
                                     <div class="text-light text-end"><em>Sem descrição.</em></div>
                                 @endif
@@ -44,19 +41,16 @@
                 <li class="text-white list-group-item text-center">
                     <div class="d-flex justify-content-evenly">
                         <b class="text-center mx-auto">Lista de tarefas</b>
-                        <a class="link-underline link-underline-opacity-0 link-opacity-50-hover"
-                            href="{{ route('tasklist.show') }}"><em>Acessar</em></a>
+                        <a class="link-underline link-underline-opacity-0 link-opacity-50-hover" href="{{ route('tasklist.show') }}"><em>Acessar</em></a>
                     </div>
                 </li>
                 @if (sizeof($lists) > 0)
                     @foreach ($lists as $list)
-                        <a class="text-info list-group-item list-group-item-action" data-bs-toggle="modal"
-                            data-bs-target="#list-resume-{{ $list->id }}">
+                        <a class="text-info list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#list-resume-{{ $list->id }}">
                             <div class="d-flex justify-content-between">
                                 <div class="text-info text-start text-truncate col-6">{{ $list->name }}</div>
                                 @if (isset($list->description))
-                                    <div class="text-white text-truncate col-4 text-end">{{ $list->description }}
-                                    </div>
+                                    <div class="text-white text-truncate col-4 text-end">{{ $list->description }}</div>
                                 @else
                                     <div class="text-light text-end"><em>Sem descrição.</em></div>
                                 @endif
@@ -76,7 +70,5 @@
             </ul>
         </div>
     </div>
-
-    @include('partials.main.footer')
 
 @endsection

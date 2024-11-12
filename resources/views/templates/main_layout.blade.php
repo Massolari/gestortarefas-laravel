@@ -16,14 +16,20 @@
 </head>
 
 <body>
+
+    @if(Auth::check())
+        @include('partials.main.nav')
+    @else
+        @include('partials.visitant.nav')
+    @endif
+
     <main class="d-flex flex-column min-vh-100">
-
         @yield('content')
-
-        <script src="{{ asset('assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
     </main>
-    
-    <!-- Incluir Axios via CDN -->
+
+    @include('partials.main.footer')
+
+    <script src="{{ asset('assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ asset('assets/scripts/script.js') }}"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
