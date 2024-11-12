@@ -20,6 +20,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(TaskApi::class)->group(function () {
-    Route::post('/task/update-time', 'updateTaskTime')->name('updateTaskTime');
-    Route::get('/task/get-time', 'getTaskTime')->name('getTaskTime');
+    Route::post('/task/start', 'startTask')->name('startTask');
+    Route::post('/task/pause', 'pauseTask')->name('pauseTask');
+    Route::post('/task/update-elapsed-time', 'updateElapsedTime')->name('updateElapsedTime');
+    Route::get('/task/get-task', 'getTask')->name('getTask');
+    Route::get('/task/check-for-started-task', 'checkForStartedTask')->name('checkForStartedTask');
 });

@@ -28,31 +28,40 @@ class AppServiceProvider extends ServiceProvider
             $url->forceScheme('https');
         }
 
-        if (Schema::hasColumns('tasks', ['is_running','elapsed_time'])) {
+        if (Schema::hasColumns('tasks', ['started_at','elapsed_time'])) {
 
             $task = TaskModel::select(['name', 'tasklist_id'])
-                ->where('is_running', '1')->first() ?? "";
+                ->whereNotNull('started_at')->first() ?? "";
             
             $list = !empty($task->tasklist_id)
-                ? TasklistModel::select('name')
+                ? TasklistModel::select(['id', 'name'])
                     ->where('id', $task->tasklist_id)
                     ->first() 
                 : "";
 
             $taskNameGlobal = $task->name ?? "";
-            $listNameGlobal = $list->name ?? "";
+
+            $listNameGlobal = !empty($task->tasklist_id)
+                ? $list->name
+                : false;
+
+            $listIdGlobal = !empty($task->tasklist_id)
+                ? $list->id
+                : false;
 
             View::share([
                 'taskNameGlobal' => $taskNameGlobal,
                 'listNameGlobal' => $listNameGlobal,
+                'listIdGlobal' => $listIdGlobal,
             ]);
 
             return;
         }
 
         View::share([
-            'taskNameGlobal' => "",
-            'listNameGlobal' => "",
+            'taskNameGlobal' => false,
+            'listNameGlobal' => false,
+            'listIdGlobal' => false,
         ]);
     }
 }

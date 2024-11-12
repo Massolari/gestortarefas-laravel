@@ -6,9 +6,9 @@
                 <h1 class="modal-title fs-5 text-info" id="taskEditTitle">{{ $form_title }}</h1>
             </div>
             <div class="p-3 modal-body">
-                <form action="{{ route($route, $task_id) }}" method="POST" id="form-new-edit-post">
+                <form action="{{ route($route) }}" method="POST" id="form-new-edit-post">
                     @csrf
-                    <input type="hidden" name="id" value="{{ $task_id }}">
+                    <input type="hidden" name="task_id" value="{{ $task_id ?? null }}">
                     {{-- task name --}}
                     <div class="mb-3 form-floating">
                         <input type="text" name="name" id="name" class="mb-2 form-control"
@@ -56,42 +56,66 @@
                         hx-target="#get-lists-response-{{ $task_id }}" hx-swap="innerHTML">
 
                         <label for="get-lists-response-{{ $task_id }}">Escolha uma lista:</label>
+
+                        <input type="hidden" name="list_choice" value="{{ $list_id ?? null }}">
+
                         @if ($status === 'new')
-                            <select class="form-select" disabled name="list">
-                                <option value="null" selected>
-                                    Sem lista.
-                                </option>
-                            </select>
+                            @if (empty($list_id))
+                                <select class="form-select" disabled name="list_choice">
+                                    <option selected>
+                                        Sem lista.
+                                    </option>
+                                </select>
+                            @else
+                                <select class="form-select" name="list_choice" disabled>
+                                    <option value="{{ $list_id }}" selected>
+                                        {{ $list_name }}
+                                    </option>
+                                </select>
+                            @endif
                         @else
-                            <select class="form-select" id="get-lists-response-{{ $task_id }}" name="list">
-                            </select>
+                            <select class="form-select" id="get-lists-response-{{ $task_id }}" name="list_choice"></select>
                         @endif
-                        {{-- serão popupladas --}}
-                        </select>
+                        
                     </div>
 
 
                     {{-- task status --}}
                     <label class="mt-3" for="status">Escolha um status:</label>
                     @if ($type == 'edit')
+
+                        <input type="hidden" name="status" id="status_hidden" value="{{ old('status', $status) }}">
                         <div>
                             <select name="status" id="status" class="form-select">
-                                <option value="new" {{ old('status', $status) == 'Nova' ? 'selected' : '' }}>
+                                <option value="new" {{ old('status', $status) == 'Nova' ? 'selected' : '' }} disabled>
                                     Nova
                                 </option>
-                                <option value="in_progress"
-                                    {{ old('status', $status) == 'Em progresso' ? 'selected' : '' }}>
-                                    Em progresso
-                                </option>
-                                <option value="cancelled"
-                                    {{ old('status', $status) == 'Cancelada' ? 'selected' : '' }}>
-                                    Cancelada
-                                </option>
-                                <option value="completed"
-                                    {{ old('status', $status) == 'Concluída' ? 'selected' : '' }}>
-                                    Concluída
-                                </option>
+                                
+                                <option value="in_progress" 
+                                        id="in_progress_{{ $task_id }}"
+                                        {{ old('status', $status) == 'Em progresso' ? 'selected' : '' }} 
+                                        {{ $status == 'Em progresso' ? '' : 'disabled' }}
+                                >Em progresso</option>
+                                
+                                <option value="not_started" 
+                                        id="not_started_{{ $task_id }}"
+                                        {{ old('status', $status) == 'Não iniciada' ? 'selected' : '' }} 
+                                        {{ $status == 'Em progresso' ? 'disabled' : '' }}
+                                >Não iniciada</option>
+                                
+                                <option value="cancelled" 
+                                        id="cancelled_{{ $task_id }}"
+                                        {{ old('status', $status) == 'Cancelada' ? 'selected' : '' }} 
+                                        {{ $status == 'Em progresso' || $status == 'Concluída' ? 'disabled' : '' }}
+                                >Cancelada</option>
+                                
+                                <option value="completed" 
+                                        id="completed_{{ $task_id }}"
+                                        {{ old('status', $status) == 'Concluída' ? 'selected' : '' }} 
+                                        {{ $status == 'Em progresso' || $status == 'Cancelada' ? 'disabled' : '' }}
+                                >Concluída</option>
                             </select>
+                    
                             @error('status')
                                 <div class="text-warning">{{ $errors->get('status')[0] }}</div>
                             @enderror

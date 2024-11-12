@@ -36,7 +36,8 @@ Route::controller(Tasklist::class)->group(function () {
     // get task lists to populate select on edit modal
     Route::get('/tasklist/get/{task_id?}', 'getTasklists')->name('tasklist.get');
 
-    Route::get('/tasklist', 'showTasklist')->name('tasklist.show'); // listas de tarefas
+    // lists routes
+    Route::get('/tasklist', 'showTasklist')->name('tasklist.show'); 
     Route::post('/tasklist/new', 'storeTasklist')->name('tasklist.new');
     Route::post('/tasklist/edit', 'editTasklist')->name('tasklist.edit');
     Route::get('/tasklist/{list_id}/delete', 'deleteTasklist')->name('tasklist.delete');
@@ -46,24 +47,20 @@ Route::controller(Tasklist::class)->group(function () {
 
 Route::controller(Task::class)->group(function () {
     // homepage of user logged in
-    Route::get('/', 'index')->name('index');
     Route::get('/userhome', 'userhome')->name('task.userhome');
 
     // routes of tasks without list
     Route::get('/task', 'tasks')->name('task.show');
     Route::post('/task/new', 'newTask')->name('task.new'); // check
     Route::post('/task/{task_id}/commentary', 'setCommentaryTask')->name('task.setCommentary'); // check
-    Route::post('/task/{task_id}/edit', 'editTask')->name('task.edit');
+    Route::post('/task/edit', 'editTask')->name('task.edit');
     Route::get('/task/{task_id}/delete', 'deleteTask')->name('task.delete');
     Route::get('/task/{search?}/search', 'searchTask')->name('task.search');
     Route::get('/task/{filter?}/filter', 'filterTask')->name('task.filter');
 
     // routes of tasks with list
-    Route::post('/tasklist/{list_id}/task/new', 'newTaskWithList')->name('taskWithList.new'); // check
-    Route::post('/tasklist/{list_id}/task/edit', 'editTaskWithList')->name('taskWithList.edit');
-    Route::get('/tasklist/{list_id}/task/{task_id}/delete', 'deleteTaskWithList')->name('taskWithList.delete');
-    Route::get('/tasklist/{list_id}/search/{search?}', 'searchTaskWithList')->name('taskWithList.search');
-    Route::get('/tasklist/{list_id}/filter/{filter?}', 'filterTaskWithList')->name('taskWithList.show');
+    Route::get('/tasklist/{list_id}/{search?}', 'searchTask')->name('taskWithList.search');
+    Route::get('/tasklist/{list_id}/filter/{filter?}', 'filterTask')->name('taskWithList.filter');
 })->middleware('auth');
 
 Route::controller(Main::class)->group(function () {

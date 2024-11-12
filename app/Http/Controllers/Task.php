@@ -10,15 +10,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Task extends Controller
 {
-    public function index()
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        return route('pages.userhome');
-    }
-
+    /**
+     * user home route method
+     *
+     * @return void
+     */
     public function userhome()
     {
         if (!Auth::check()) {
@@ -34,8 +30,6 @@ class Task extends Controller
             ->orderBy('created_at', 'DESC')
             ->take(5)
             ->get();
-
-        // dd($tasks);
 
         $lists = TasklistModel::where('user_id', Auth::user()->id)
             ->orderBy('created_at', 'DESC')
@@ -70,74 +64,25 @@ class Task extends Controller
         return view('pages.userhome', $data);
     }
 
-    public function searchTaskWithList($tasklistId = null, $search = 'all')
+    /**
+     * Return view thats show tasks with list or without list
+     *
+     * @param integer|null|null $listId
+     * @param string $filter
+     * @return void
+     */
+    public function tasks(int|null $listId = null, string $filter = 'all')
     {
+        
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-
-        $tasklist = TasklistModel::where('id', $tasklistId)->first();
-        $tasks = Task::getTasksBySearch(userId: Auth::user()->id, tasklistId: $tasklistId, search: $search);
-
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
-
-        $data = [
-            'title' => 'Minhas Tarefas',
-            'tasks' => $tasks,
-            'filter' => $search,
-            'user_id' => Auth::user()->id,
-            'list_id' => $tasklistId,
-            'list_name' => $tasklist->name,
-            'list_description' => $tasklist->description,
-            'user_level' => $lvl,
-            'user_experience' => $exp,
-            'user_name' => Auth::user()->name,
-        ];
-
-        return view('pages.user.tasksWithList', $data); // mostra as tarefas escolhidas
-    }
-
-    public function filterTaskWithList($tasklistId = null, $filter = 'all')
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        // dd($tasklistId, $search);
-
-        $tasklist = TasklistModel::where('id', $tasklistId)->first();
-        $tasks = Task::getTaskByFilter($tasklistId, $filter);
-
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
-
-        $data = [
-            'title' => 'Minhas Tarefas',
-            'tasks' => $tasks,
-            'filter' => $filter,
-            'user_id' => Auth::user()->id,
-            'list_id' => $tasklistId,
-            'list_name' => $tasklist->name,
-            'list_description' => $tasklist->description,
-            'user_level' => $lvl,
-            'user_experience' => $exp,
-            'user_name' => Auth::user()->name,
-        ];
-
-        return view('pages.user.tasksWithList', $data); // mostra as tarefas escolhidas
-    }
-
-
-    public function tasks(string $filter = 'all')
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
+        
         $amountOfCompletedTasks = TaskModel::where('status', 'completed')->count();
-
+        
         ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
-
-        $tasks = Task::getTasksBySearch(userId: Auth::user()->id, tasklistId: null, search: $filter);
+        
+        $tasks = Task::getTasksBySearch(userId: Auth::user()->id, listId: $listId, search: $filter);
 
         $data = [
             'title' => 'Minhas Tarefas',
@@ -145,19 +90,22 @@ class Task extends Controller
             'filter' => $filter,
             'user_id' => Auth::user()->id,
             'list_name' => 'Tarefas sem lista',
-            'list_id' => '',
+            'list_id' => $listId ?? null,
             'user_level' => $lvl,
             'user_experience' => $exp,
             'user_name' => Auth::user()->name,
         ];
-
+        
         return view('pages.user.tasks', $data);
     }
 
     /**
-     * submit a new task
+     * Store a new task
+     *
+     * @param Request $request
+     * @return void
      */
-    public function newTaskWithList($tasklistId, Request $request)
+    public function newTask(Request $request, $list_id = null)
     {
         $request->validate([
             'name' => 'required|unique:tasks|min:3|max:200',
@@ -171,36 +119,7 @@ class Task extends Controller
         ]);
 
         TaskModel::create([
-            'tasklist_id' => $tasklistId,
-            'name' => $request->input('name'),
-            'user_id' => Auth::user()->id,
-            'description' => $request->input('description'),
-            'status' => 'new',
-            'commentary' => null,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        return back();
-    }
-
-    /**
-     * submit a new task
-     */
-    public function newTask(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|unique:tasks|min:3|max:200',
-            'description' => 'max:1000',
-        ], [
-            'name.required' => 'O campo é obrigatório.',
-            'name.unique' => 'Já existe uma tarefa com este nome.',
-            'name.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'name.max' => 'O campo deve ter no máximo :max caracteres.',
-            'description.max' => 'O campo deve ter no máximo :max caracteres.',
-        ]);
-
-        TaskModel::create([
-            'tasklist_id' => null,
+            'tasklist_id' => $request->input('list_choice'),
             'name' => $request->input('name'),
             'user_id' => Auth::user()->id,
             'description' => $request->input('description'),
@@ -214,41 +133,11 @@ class Task extends Controller
 
     /**
      * edit a task
-     */
-
-    public function editTask($taskId, Request $request)
-    {
-        $request->validate([
-            'name' => 'required|min:3|max:200',
-            'description' => 'max:1000',
-        ], [
-            'name.required' => 'O campo é obrigatório.',
-            'name.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'name.max' => 'O campo deve ter no máximo :max caracteres.',
-            'description.max' => 'O campo deve ter no máximo :max caracteres.',
-        ]);
-
-        // update the task
-        TaskModel::where('id', $request->id)
-            ->update([
-                'name' => $request->input('name'),
-                'description' => $request->input('description'),
-                'status' => $request->input('status'),
-                'tasklist_id' => $request->input('list') === 'null' ? null : $request->input('list'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-
-        return back();
-    }
-
-    /**
-     * edit a task in list
      *
-     * @param $list_id
      * @param Request $request
      * @return void
      */
-    public function editTaskWithList($list_id, Request $request)
+    public function editTask(Request $request)
     {
         $request->validate([
             'name' => 'required|min:3|max:200',
@@ -259,37 +148,22 @@ class Task extends Controller
             'name.max' => 'O campo deve ter no máximo :max caracteres.',
             'description.max' => 'O campo deve ter no máximo :max caracteres.',
         ]);
+        
+        $list_id = $request->input('list_choice');
+
+        $list_id = $list_id === 'null'
+            ? null 
+            : $request->input('list_choice');
 
         // update the task
-        TaskModel::where('id', $request->id)
-            ->where('tasklist_id', $list_id)
+        TaskModel::where('id', $request->input('task_id'))
             ->update([
                 'name' => $request->input('name'),
                 'description' => $request->input('description'),
                 'status' => $request->input('status'),
-                'tasklist_id' => $request->input('list') === 'null' ? null : $request->input('list'),
+                'tasklist_id' =>  $list_id,
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
-
-        return back();
-    }
-
-    /**
-     * delete a task in list
-     *
-     * @param $tasklistId
-     * @param $id
-     * @return void
-     */
-    public function deleteTaskWithList($tasklistId, $id)
-    {
-        try {
-            TaskModel::where('id', $id)
-                ->where('tasklist_id', $tasklistId)
-                ->delete();
-        } catch (Exception $e) {
-            return redirect()->route('task.index');
-        }
 
         return back();
     }
@@ -300,10 +174,10 @@ class Task extends Controller
      * @param $id
      * @return void
      */
-    public function deleteTask($id)
+    public function deleteTask(int $taskId)
     {
         try {
-            TaskModel::find($id)->delete();
+            TaskModel::find($taskId)->delete();
         } catch (Exception $e) {
             return redirect()->route('task.index');
         }
@@ -317,25 +191,36 @@ class Task extends Controller
      * @param string $search
      * @return void
      */
-    public function searchTask($search = 'all')
+    public function searchTask($listId = null, $search = 'all')
     {
-        $tasks = Task::getTasksBySearch(null, $search);
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
 
-        // dd($tasks);
+        if (!empty($listId)) {
+            $tasklist = TasklistModel::where('id', $listId)->first();
+        }
+
+        $tasks = Task::getTasksBySearch(userId: Auth::user()->id, listId: $listId, search: $search);
+
         ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
 
         $data = [
             'title' => 'Minhas Tarefas',
-            'datatables' => false,
-            'user_name' => Auth::user()->name,
-            'list_name' => 'Tarefas sem lista',
-            // 'list_id' => $tasklistId,
+            'tasks' => $tasks,
+            'filter' => $search,
+            'user_id' => Auth::user()->id,
+            'list_id' => $listId,
+            'list_name' => $tasklist->name,
+            'list_description' => $tasklist->description,
             'user_level' => $lvl,
             'user_experience' => $exp,
-            'tasks' => $tasks,
+            'user_name' => Auth::user()->name,
         ];
 
-        return view('pages.user.tasks', $data);
+        return $listId 
+            ? view('pages.user.tasksWithList', $data)
+            : view('pages.user.tasks', $data);
     }
 
 
@@ -345,25 +230,33 @@ class Task extends Controller
      * @param string $search
      * @return void
      */
-    public function filterTask($filter = 'all')
+    public function filterTask($listId = null, $filter = 'all')
     {
-        $tasks = Task::getTaskByFilter(null, $filter);
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
 
-        // dd($tasks);
+        $tasklist = TasklistModel::where('id', $listId)->first();
+        $tasks = Task::getTaskByFilter($listId, $filter);
+
         ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
 
         $data = [
             'title' => 'Minhas Tarefas',
-            'datatables' => false,
-            'user_name' => Auth::user()->name,
-            'list_name' => 'Tarefas sem lista',
+            'tasks' => $tasks,
             'filter' => $filter,
+            'user_id' => Auth::user()->id,
+            'list_id' => $listId,
+            'list_name' => $tasklist->name,
+            'list_description' => $tasklist->description,
             'user_level' => $lvl,
             'user_experience' => $exp,
-            'tasks' => $tasks,
+            'user_name' => Auth::user()->name,
         ];
 
-        return view('pages.user.tasks', $data);
+        return !empty($taskId) 
+            ? view('pages.user.tasksWithList', $data)
+            : view('pages.user.tasks', $data);
     }
 
     /**
@@ -437,33 +330,29 @@ class Task extends Controller
     }
 
     /**
-     * get task from database
+     * get tasks based on search
+     *
+     * @param int|null $userId
+     * @param int|null $listId
+     * @param string $search
+     * @return void
      */
-    private static function getTasksBySearch($userId = null, $tasklistId = null, $search = 'all')
+    private static function getTasksBySearch($userId = null, $listId = null, $search = 'all')
     {
-
-        $tasks = [];
-        $allTasks = [];
-        // get tasks
-
-        if ($search != 'all') {
-            $allTasks = TaskModel::where('user_id', $userId)
-                ->where('tasklist_id', $tasklistId)
-                ->where(function ($query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('description', 'like', '%' . $search . '%')
-                        ->orderBy('created_at', 'DESC');
-                })->whereNull('deleted_at')->get();
-        } else {
-            $allTasks = TaskModel::where('user_id', $userId)
-                ->where('tasklist_id', $tasklistId)
-                ->orderBy('created_at', 'DESC')
+        $query = TaskModel::where('user_id', $userId)
+            ->where('tasklist_id', $listId)
+            ->orderBy('created_at', 'DESC')
                 ->whereNull('deleted_at')->get();
+
+        if ($search !== 'all') {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
         }
 
-        foreach ($allTasks as $task) {
-
-            $tasks[] = [
+        $tasks = array_map(function ($task) {
+            return [
                 'id' => $task['id'],
                 'name' => $task['name'],
                 'description' => $task['description'],
@@ -473,48 +362,60 @@ class Task extends Controller
                 'user_id' => $task['user_id'],
                 'commentary' => $task['commentary'],
             ];
-        }
+        }, $query->toArray());
 
         return $tasks;
     }
 
     /**
-     * private methods
+     * get status name in portuguese
+     *
+     * @param string $status
+     * @return string
      */
-
     private static function statusName(string $status): string
     {
         $status_collection = [
             'all' => 'Minhas Tarefas',
             'new' => 'Nova',
             'in_progress' => 'Em progresso',
+            'not_started' => 'Não iniciada',
             'cancelled' => 'Cancelada',
             'completed' => 'Concluída',
         ];
 
         if (key_exists($status, $status_collection)) {
             return $status_collection[$status];
-        } else {
-            return 'Desconhecido';
         }
     }
 
+    /**
+     * get bootstrap class name based on status
+     *
+     * @param string $status
+     * @return string
+     */
     private static function statusBadge(string $status): string
     {
         $status_collection = [
             'new' => 'badge bg-success',
             'in_progress' => 'badge bg-info',
+            'not_started' => 'badge bg-primary',
             'cancelled' => 'badge bg-danger',
             'completed' => 'badge bg-secondary',
         ];
 
         if (key_exists($status, $status_collection)) {
             return $status_collection[$status];
-        } else {
-            return 'badge bg-secondary';
         }
     }
 
+    /**
+     * get level and experience based on completed tasks
+     *
+     * @param integer $completedTasksAmount
+     * @return array
+     */
     static function getLevelAndExp(int $completedTasksAmount): array
     {
         $lvl = (int) ($completedTasksAmount / 100) + 1;
@@ -523,6 +424,11 @@ class Task extends Controller
         return ['lvl' => $lvl, 'exp' => $exp];
     }
 
+    /**
+     * get amount of completed tasks of user
+     *
+     * @return integer
+     */
     static function getCompletedTasks(): int
     {
         return TaskModel::where('user_id', Auth::user()->id)

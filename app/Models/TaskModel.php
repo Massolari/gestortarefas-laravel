@@ -23,7 +23,7 @@ class TaskModel extends Model
         'updated_at',
         'deleted_at',
         'elapsed_time',
-        'is_running'
+        'started_at'
     ];
     protected $table = 'tasks';
 

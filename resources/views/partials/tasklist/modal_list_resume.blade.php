@@ -47,7 +47,7 @@
                 <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#edit_tasklist-{{ $list['id'] }}"
                     title="Editar esta lista de tarefas."><i class="bi bi-pencil me-2"></i>Editar
                 </button>
-                <a href="{{ route('taskWithList.search', $list['id']) }}" class="btn btn-success"
+                <a href="{{ route('task.search', $list['id']) }}" class="btn btn-success"
                     title="Visualizar lista de tarefas."><i class="bi bi-arrow-right-circle me-2"></i>Acessar a
                     Lista</a>
             </div>
