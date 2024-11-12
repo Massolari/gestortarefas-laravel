@@ -1,7 +1,6 @@
-@extends('templates.main_layout') @section('content')
-@section('content')
+@extends('templates.main_layout')
 
-    @include('partials.visitant.nav')
+@section('content')
 
     <div class="container text-center">
         <img class="img-fluid" src="{{ asset('assets/img/small/full-logo-dark-theme.png') }}" alt="Full logo Ramtask">
@@ -15,20 +14,17 @@
                 <div class="mx-auto my-3 col-lg-4 col-md-6 col-sm-12">
                     <h2>Organize suas Tarefas</h2>
                     <p>Gerencie suas tarefas acadêmicas, profissionais e pessoais de forma centralizada.</p>
-                    <img src="{{ asset('assets/img/examples/img-1.png') }}" alt="imagem de exemplo tarefas faculdade"
-                        class="img-fluid">
+                    <img src="{{ asset('assets/img/examples/img-1.png') }}" alt="imagem de exemplo tarefas faculdade" class="img-fluid">
                 </div>
                 <div class="mx-auto my-3 col-lg-4 col-md-6 col-sm-12">
                     <h2>Detalhe suas Tarefas</h2>
                     <p>Adicione descrições detalhadas e anotações importantes a cada tarefa para melhor organização.</p>
-                    <img src="{{ asset('assets/img/examples/img-2.png') }}" alt="imagem de exemplo detalhar as tarefas"
-                        class="img-fluid">
+                    <img src="{{ asset('assets/img/examples/img-2.png') }}" alt="imagem de exemplo detalhar as tarefas" class="img-fluid">
                 </div>
                 <div class="mx-auto my-3 col-lg-4 col-md-6 col-sm-12">
                     <h2>Planeje suas Viagens</h2>
                     <p>Crie listas de itens para viagem para garantir que você esteja sempre preparado.</p>
-                    <img src="{{ asset('assets/img/examples/img-3.png') }}" alt="imagem de exemplo tarefas da viagem"
-                        class="img-fluid">
+                    <img src="{{ asset('assets/img/examples/img-3.png') }}" alt="imagem de exemplo tarefas da viagem" class="img-fluid">
                 </div>
             </div>
         </div>
@@ -39,5 +35,4 @@
             <p>&copy; <?php echo date('Y'); ?> RamTask. Todos os direitos reservados.</p>
         </div>
     </footer>
-
 @endsection
