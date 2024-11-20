@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\Login;
-use App\Http\Controllers\Main;
-use App\Http\Controllers\ProjectReport;
-use App\Http\Controllers\SignUp;
-use App\Http\Controllers\Task;
-use App\Http\Controllers\Tasklist;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MainController;
+use App\Http\Controllers\ProjectReportController;
+use App\Http\Controllers\SignUpController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TasklistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::controller(SignUp::class)->group(function () {
+Route::controller(SignUpController::class)->group(function () {
     Route::get('/signup', 'signUp')->name('signup');
     Route::post('/signup', 'signUpSubmit')->name('signup.submit');
     Route::post('/signup/send-code', 'sendVerificationCode')->name('signup.send-code');
@@ -29,7 +29,7 @@ Route::controller(SignUp::class)->group(function () {
     Route::post('/signup/submit', 'signUpSubmit')->name('signup.submit');
 });
 
-Route::controller(Login::class)->group(function () {
+Route::controller(LoginController::class)->group(function () {
     Route::get('/googleLogin', 'googleLogin')->name('login.google');
     Route::get('/login', 'login')->name('login');
     Route::post('/login', 'loginSubmit')->name('login.submit');
@@ -37,7 +37,7 @@ Route::controller(Login::class)->group(function () {
     Route::post('/logout', 'logoutSubmit')->name('logout.submit');
 });
 
-Route::controller(Tasklist::class)->group(function () {
+Route::controller(TasklistController::class)->group(function () {
     // get task lists to populate select on edit modal
     Route::get('/tasklist/get/{task_id?}', 'getTasklists')->name('tasklist.get');
 
@@ -50,7 +50,7 @@ Route::controller(Tasklist::class)->group(function () {
     Route::get('/tasklist/search/{search?}', 'searchTasklist')->name('tasklist.search');
 })->middleware('auth');
 
-Route::controller(Task::class)->group(function () {
+Route::controller(TaskController::class)->group(function () {
     // homepage of user logged in
     Route::get('/userhome', 'userhome')->name('task.userhome');
 
@@ -68,11 +68,11 @@ Route::controller(Task::class)->group(function () {
     Route::get('/tasklist/{list_id}/filter/{filter?}', 'filterTask')->name('taskWithList.filter');
 })->middleware('auth');
 
-Route::controller(Main::class)->group(function () {
+Route::controller(MainController::class)->group(function () {
     Route::get('/', 'index')->name('home');
     Route::get('/resources', 'resources')->name('resources');
     Route::get('/contact', 'contact')->name('contact');
     Route::get('/about_developer', 'developer')->name('developer');
 });
 
-Route::get('/download/pdf', [ProjectReport::class, 'downloadPDF'])->name('downloadPDF');
+Route::get('/download/pdf', [ProjectReportController::class, 'downloadPDF'])->name('downloadPDF');
