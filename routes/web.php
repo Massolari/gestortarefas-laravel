@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Route;
 Route::controller(SignUp::class)->group(function () {
     Route::get('/signup', 'signUp')->name('signup');
     Route::post('/signup', 'signUpSubmit')->name('signup.submit');
+    Route::post('/signup/send-code', 'sendVerificationCode')->name('signup.send-code');
+    Route::get('/signup/verify', 'verifyCodeForm')->name('signup.verify');
+    Route::post('/signup/verify', 'verifyCode')->name('signup.verify.submit');
+    Route::get('/signup/form', 'signUpForm')->name('signup.form');
+    Route::post('/signup/submit', 'signUpSubmit')->name('signup.submit');
 });
 
 Route::controller(Login::class)->group(function () {
