@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\TaskApi;
+use App\Http\Controllers\TaskApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +19,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::controller(TaskApi::class)->group(function () {
+Route::controller(TaskApiController::class)->group(function () {
     Route::post('/task/start', 'startTask')->name('startTask');
     Route::post('/task/pause', 'pauseTask')->name('pauseTask');
     Route::post('/task/update-elapsed-time', 'updateElapsedTime')->name('updateElapsedTime');

@@ -11,7 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class Task extends Controller
+class TaskController extends Controller
 {
     /**
      * user home route method
@@ -26,7 +26,7 @@ class Task extends Controller
 
         $amountOfCompletedTasks = TaskModel::where('status', 'completed')->count();
 
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp($amountOfCompletedTasks);
 
         $tasks = TaskModel::where('user_id', Auth::user()->id)
             ->where('tasklist_id', null)
@@ -85,9 +85,9 @@ class Task extends Controller
         
         $amountOfCompletedTasks = TaskModel::where('status', 'completed')->count();
         
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp($amountOfCompletedTasks);
         
-        $tasks = Task::getTasksBySearch(userId: Auth::user()->id, listId: $listId, search: $filter);
+        $tasks = TaskController::getTasksBySearch(userId: Auth::user()->id, listId: $listId, search: $filter);
 
         $data = [
             'title' => 'Minhas Tarefas',
@@ -210,9 +210,9 @@ class Task extends Controller
             $tasklist = TasklistModel::where('id', $listId)->first();
         }
 
-        $tasks = Task::getTasksBySearch(userId: Auth::user()->id, listId: $listId, search: $search);
+        $tasks = TaskController::getTasksBySearch(userId: Auth::user()->id, listId: $listId, search: $search);
 
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp(TaskController::getCompletedTasks());
 
         $data = [
             'title' => 'Minhas Tarefas',
@@ -248,9 +248,9 @@ class Task extends Controller
         }
 
         $tasklist = TasklistModel::where('id', $listId)->first();
-        $tasks = Task::getTaskByFilter($listId, $filter);
+        $tasks = TaskController::getTaskByFilter($listId, $filter);
 
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp(TaskController::getCompletedTasks());
 
         $data = [
             'title' => 'Minhas Tarefas',
@@ -310,7 +310,7 @@ class Task extends Controller
         $tasks = [];
         $allTasks = [];
 
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp(Task::getCompletedTasks());
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp(TaskController::getCompletedTasks());
 
         if ($filter != 'all') {
             $allTasks = TaskModel::where('tasklist_id', $tasklist_id)
@@ -333,8 +333,8 @@ class Task extends Controller
                 'id' => $task->id,
                 'name' => $task->name,
                 'description' => $task->description,
-                'status' => Task::statusName($task->status),
-                'status_style' => Task::statusBadge($task->status),
+                'status' => TaskController::statusName($task->status),
+                'status_style' => TaskController::statusBadge($task->status),
                 'tasklist_id' => $task->tasklist_id,
                 'commentary' => $task->commentary,
                 'user_id' => Auth::user()->id,
@@ -374,8 +374,8 @@ class Task extends Controller
                 'id' => $task['id'],
                 'name' => $task['name'],
                 'description' => $task['description'],
-                'status' => Task::statusName($task['status']),
-                'status_style' => Task::statusBadge($task['status']),
+                'status' => TaskController::statusName($task['status']),
+                'status_style' => TaskController::statusBadge($task['status']),
                 'tasklist_id' => $task['tasklist_id'],
                 'user_id' => $task['user_id'],
                 'commentary' => $task['commentary'],

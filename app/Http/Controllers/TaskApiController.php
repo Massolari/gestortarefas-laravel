@@ -7,7 +7,7 @@ use App\Models\TaskModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class TaskApi extends Controller
+class TaskApiController extends Controller
 {
     /**
      * UTC format used on this case

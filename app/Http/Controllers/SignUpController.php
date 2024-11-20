@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
-class SignUp extends Controller
+class SignUpController extends Controller
 {
     protected $signUpService;
 
