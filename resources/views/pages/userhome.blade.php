@@ -1,4 +1,4 @@
-@extends('templates.main_layout')
+@extends('layout.main')
 @section('content')
 
     <div class="row mx-2 mb-auto">

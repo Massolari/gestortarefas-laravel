@@ -1,4 +1,4 @@
-@extends('templates.project_report_layout')
+@extends('layout.project_report')
 
 @section('content')
     <div class="report-container">
