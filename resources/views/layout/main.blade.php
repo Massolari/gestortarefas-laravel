@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link id="favicon-site" href="{{ asset('assets/img/small-logo.png') }}" rel="shortcut icon" />
-    <title>{{ $title }}</title>
+    <title>{{ $title ?? 'RamTask'}}</title>
     <link rel="stylesheet" href="{{ asset('assets/styles/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/bootstrap/dark/bootstrap.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

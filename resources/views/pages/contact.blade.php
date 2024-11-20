@@ -1,4 +1,4 @@
-@extends('templates.login_layout')
+@extends('layout.login')
 
 @section('content')
     <div class="container-resources py-5">

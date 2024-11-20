@@ -2,87 +2,138 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UserModel;
+use App\Services\SignUpService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class SignUp extends Controller
 {
-    public function signUp()
-    {
-        $data = [
-            'title' => 'Cadastro',
-            'datatables' => false,
-        ];
+    protected $signUpService;
 
-        return view('pages.signup', $data);
+    /**
+     * Constructor - injects SignUpService dependency
+     * 
+     * @param SignUpService $signUpService Service for handling signup operations
+     */
+    public function __construct(SignUpService $signUpService)
+    {
+        $this->signUpService = $signUpService;
     }
 
-    public function signUpSubmit(Request $request)
+    /**
+     * Display the initial signup email form
+     *
+     * @return \Illuminate\View\View
+     */
+    public function signUp(): View
     {
+        return view('pages.signup.email');
+    }
 
-        $request->validate([
-            'name' => 'required|min:3',
-            'email' => 'required|same:email_confirm',
-            'email_confirm' => 'required|same:email',
-            'password' => 'required|min:3|same:password_confirm',
-            'password_confirm' => 'required|min:3|same:password',
-        ], [
-            'name.required' => 'O campo é obrigatório.',
-            'name.min' => 'O campo deve ter no mínimo :min caracteres.',
+    /**
+     * Handle email verification code sending
+     *
+     * @param Request $request HTTP request containing email
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function sendVerificationCode(Request $request): RedirectResponse|View
+    {
+        $request->validate(['email' => 'required|email']);
 
-            'email.required' => 'O campo é obrigatório',
-            'email.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'email.same' => 'E-Mail e a confirmação são diferentes',
-
-            'email_confirm.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'email_confirm.required' => 'O campo é obrigatório',
-            'email_confirm.same' => 'E-Mail e a confirmação são diferentes',
-
-            'password.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'password.required' => 'O campo é obrigatório',
-            'password.same' => 'A senha e a confirmação são diferentes',
-
-            'password_confirm.min' => 'O campo deve ter no mínimo :min caracteres.',
-            'password_confirm.required' => 'O campo é obrigatório',
-            'password_confirm.same' => 'A senha e a confirmação são diferentes',
-        ]);
-
-        $newUser = [
-            'name' => $request->get('name'),
-            'email' => $request->get('email'),
-            'emailConfirm' => $request->get('email_confirm'),
-            'password' => $request->get('password'),
-            'passwordConfirm' => $request->get('password_confirm'),
-        ];
-
-        //  check if email has exists
-        $user = UserModel::where('email', $request->get('email'))
-            ->whereNull('deleted_at')
-            ->first();
-
-        if ($user) {
-            return redirect()->back()
-                ->withInput(['name', 'email', 'email_confirm'])
-                ->with('signup_error', 'Já existe um usuário com esse email');
-        } else {
-
-            UserModel::create([
-                'name' => $request->get('name'),
-                'email' => $request->get('email'),
-                'level' => 1,
-                'experience' => 0,
-                'created_count' => 0,
-                'deleted_count' => 0,
-                'completed_count' => 0,
-                'canceled_count' => 0,
-                'list_created_count' => 0,
-                'list_deleted_count' => 0,
-                'password' => Hash::make($newUser['password']),
+        if ($this->signUpService->checkEmailExists($request->email)) {
+            return view('pages.signup.email', [
+                'error' => 'E-mail já cadastrado',
+                'email' => $request->email
             ]);
-
-            return redirect()->route('login')->with('signup_success', 'Conta cadastrada consucesso, redirecionando para o login');
         }
 
+        $code = $this->signUpService->generateAndSaveVerificationCode($request->get('email'));
+        $this->signUpService->sendVerificationEmail($request->get('email'), $code);
+
+        return redirect()->route('signup.verify')->with('email', $request->email);
+    }
+
+    /**
+     * Display verification code input form
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
+    public function verifyCodeForm(): RedirectResponse|View
+    {
+        if (!session('email')) {
+            return redirect()->route('signup');
+        }
+
+        return view('pages.signup.verify');
+    }
+
+    /**
+     * Verify the submitted verification code
+     *
+     * @param Request $request HTTP request containing verification code
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function verifyCode(Request $request): RedirectResponse
+    {
+        $request->validate(['code' => 'required|string|size:6']);
+
+        $verification = $this->signUpService->verifyCode($request->email, $request->code);
+
+        if (!$verification) {
+            return view('pages.signup.verify', [
+                'error' => 'Código de verificação inválido ou expirado',
+                'email' => $email
+            ]);
+        }
+
+        $verification->update(['verified' => true]);
+
+        return redirect()->route('signup.form')
+            ->with('email', $request->email);
+    }
+
+    /**
+     * Display the signup form after email verification
+     *
+     * @return View
+     */
+    public function signUpForm()
+    {
+        if (!session('email')) {
+            return redirect()->route('signup');
+        }
+
+        return view('pages.signup.form', [
+            'email' => session('email'),
+        ]);
+    }
+
+    /**
+     * Handle the signup form submission
+     *
+     * @param Request $request HTTP request containing user registration data
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function signUpSubmit(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|min:3',
+            'email' => 'required|email',
+            'password' => 'required|min:6|same:password_confirm',
+            'password_confirm' => 'required|min:6',
+        ]);
+
+        $verification = $this->signUpService->checkVerification($request->email);
+
+        if (!$verification) {
+            return redirect()->route('signup');
+        }
+
+        $this->signUpService->createUser($request->all());
+        $verification->delete();
+
+        return redirect()->route('login')
+            ->with('success', 'Cadastro realizado com sucesso');
     }
 }
