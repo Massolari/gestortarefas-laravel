@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 use function PHPUnit\Framework\isNull;
 
-class Tasklist extends Controller
+class TasklistController extends Controller
 {
     /**
      * Get all task lists and format them as HTML select options
@@ -60,14 +60,14 @@ class Tasklist extends Controller
             ->where('status', 'completed')
             ->count();
 
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp($amountOfCompletedTasks);
 
         $data = [
             'title' => 'Lista de tarefas',
             'user_name' => Auth::user()->name,
             'user_level' => $lvl,
             'user_experience' => $exp,
-            'lists' => Tasklist::getLists(),
+            'lists' => TasklistController::getLists(),
         ];
 
         return view('pages.tasklist', $data);
@@ -130,7 +130,7 @@ class Tasklist extends Controller
         $tasklist->updated_at = date('Y-m-d H:i:s');
         $tasklist->save();
 
-        // $tasklists = Tasklist::getLists();
+        // $tasklists = TasklistController::getLists();
 
         return redirect()->route('tasklist.show');
     }
@@ -160,7 +160,7 @@ class Tasklist extends Controller
             ->where('status', 'completed')
             ->count();
 
-        ['lvl' => $lvl, 'exp' => $exp] = Task::getLevelAndExp($amountOfCompletedTasks);
+        ['lvl' => $lvl, 'exp' => $exp] = TaskController::getLevelAndExp($amountOfCompletedTasks);
 
         if ($search) {
             $tasklists = TasklistModel::where('user_id', Auth::user()->id)

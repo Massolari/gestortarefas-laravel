@@ -9,7 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ProjectReport extends Controller
+class ProjectReportController extends Controller
 {
     /**
      * format task elapsed time form humans
