@@ -70,7 +70,6 @@ class SignUpService
     ): ?VerificationMailModel {
         return VerificationMailModel::where('email', $email)
             ->where('verification_code', $code)
-            ->where('expires_at', '>', now())
             ->first();
     }
 
