@@ -23,7 +23,7 @@
                     <p class="text-success text-center my-2">{{ session('success') }}</p>
                 @endif
                 
-                <button type="submit" class="btn btn-primary" title="Continuar com o cadastro">Continuar</button>
+                <button type="submit" class="btn btn-primary" title="Continuar com o cadastro">{{ !empty(session('button_label')) ? session('button_label') : 'Enviar' }}</button>
             </form>
         </div>
     </div>

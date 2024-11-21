@@ -80,8 +80,7 @@ Route::get('/download/pdf', [ProjectReportController::class, 'downloadPDF'])->na
 
 Route::controller(PasswordResetController::class)->group(function () {
     Route::get('/password/reset', 'resetPasswordForm')->name('password.reset');
-    Route::post('/password/reset', 'sendResetPasswordEmail')->name('password.reset.submit');
+    Route::post('/password/reset', 'sendResetPasswordMail')->name('password.reset.submit');
     Route::get('/password/reset/{token}', 'newPasswordForm')->name('password.reset.new');
     Route::post('/password/reset/{token}', 'updatePassword')->name('password.reset.new.submit');
-    Route::get('/password/reset/resend/{email}', 'resendResetPasswordEmail')->name('password.reset.resend');
 });

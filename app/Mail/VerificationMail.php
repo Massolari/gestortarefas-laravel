@@ -27,7 +27,7 @@ class VerificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'no-reply',
+            subject: 'Confirmação de e-mail',
         );
     }
 
