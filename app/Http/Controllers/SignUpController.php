@@ -6,6 +6,7 @@ use App\Services\SignUpService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class SignUpController extends Controller
 {
@@ -124,7 +125,12 @@ class SignUpController extends Controller
         $verification = $this->signUpService->checkVerification($request->email);
         $verification->delete();
 
-        return redirect()->route('login')
-            ->with('success', 'Cadastro realizado com sucesso');
+        if (Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ])) {
+            $request->session()->regenerate();
+            return redirect()->route('task.userhome');
+        }
     }
 }

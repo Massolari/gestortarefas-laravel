@@ -17,6 +17,9 @@
                 @error('email')
                     <p class="text-danger text-center my-2">{{ $message }}</p>
                 @enderror
+                @isset($error)
+                    <p class="text-danger text-center my-2">{{ $error }}</p>
+                @endisset
                 <button type="submit" class="btn btn-primary" title="Continuar com o cadastro">Continuar</button>
             </form>
         </div>
