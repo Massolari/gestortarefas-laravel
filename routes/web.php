@@ -6,6 +6,7 @@ use App\Http\Controllers\ProjectReportController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TasklistController;
+use App\Http\Controllers\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -76,3 +77,11 @@ Route::controller(MainController::class)->group(function () {
 });
 
 Route::get('/download/pdf', [ProjectReportController::class, 'downloadPDF'])->name('downloadPDF');
+
+Route::controller(PasswordResetController::class)->group(function () {
+    Route::get('/password/reset', 'resetPasswordForm')->name('password.reset');
+    Route::post('/password/reset', 'sendResetPasswordEmail')->name('password.reset.submit');
+    Route::get('/password/reset/{token}', 'newPasswordForm')->name('password.reset.new');
+    Route::post('/password/reset/{token}', 'updatePassword')->name('password.reset.new.submit');
+    Route::get('/password/reset/resend/{email}', 'resendResetPasswordEmail')->name('password.reset.resend');
+});
