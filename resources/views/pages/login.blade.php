@@ -36,6 +36,7 @@
                     {{-- submit button to login --}}
                     <div class="col-12 my-2">
                         <button type="submit" class="btn btn-success w-100">Logar <i class="bi bi-door-open-fill"></i></button>
+                        <a href="{{ route('password.reset') }} "><em><small class="d-flex justify-content-end text-light btn-link">Esqueci minha senha</small></em></a>
                     </div>
 
                     {{-- link button to signup --}}
