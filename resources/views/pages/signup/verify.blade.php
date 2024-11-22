@@ -20,9 +20,9 @@
                     <input type="text" class="form-control text-center fs-2 otp-input rounded-circle bg-secondary text-light shadow shadow-md" maxlength="1" style="width: 60px; height: 60px;">
                 </div>
                 <input type="hidden" name="code" id="otp-value">
-                @if (isset($error))
-                    <p class="text-danger text-center my-2">{{ $error }}</p>
-                @endif
+                @error('code')
+                    <p class="text-danger text-center my-2">{{ $message }}</p>
+                @enderror
                 <button type="submit" class="btn btn-primary shadow shadow-sm" title="Verificar código">Verificar</button>
             </form>
 
