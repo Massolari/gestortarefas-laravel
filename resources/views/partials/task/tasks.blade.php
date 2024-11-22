@@ -1,4 +1,11 @@
-<div class="container mb-auto">
+<script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+    }
+  }
+</script>
+<div class="container mb-auto" id="vue-app">
     {{-- Header Section --}}
     <div class="container-fluid justify-content-center">
         {{-- List Title and Description --}}
@@ -108,7 +115,8 @@
                             </span>
                             <div class="collapse p-0 m-0" id="navbarNav-{{ $task['id'] }}">
                                 <div class="btn-group-vertical">
-                                    <a class="btn btn-success shadow shadow-md mt-3" title="iniciar cronmêtro" data-bs-toggle="modal" data-bs-target="#modalTaskChronometer_{{ $task['id'] }}_{{ $list_id }}">
+
+                                    <a class="btn btn-success shadow shadow-md mt-3" title="iniciar cronômetro" data-bs-toggle="modal" data-bs-target="#modal_timer" @click="openModal({{ json_encode($task) }})">
                                         <i class="bi bi-stopwatch"></i>
                                     </a>
                                     <a class="btn btn-primary shadow shadow-md" title="Comentários" data-bs-toggle="modal" data-bs-target="#modalCommentary-{{ $task['id'] }}">
@@ -176,16 +184,6 @@
                         </div>
                     </div>
 
-                    {{-- Include Stopwatch Modal --}}
-                    @include('partials.task.modal_stopwatch_task',[
-                        'modal_id' => 'modalTaskChronometer_' . $task['id'] . '_' . $list_id,
-                        'modal_title' => 'Cronomêtro de tarefa',
-                        'list_id' => $list_id,
-                        'list_name' => $list_name,
-                        'task_id' => $task['id'],
-                        'task_name' => $task['name'],
-                    ])
-
                     {{-- Include Edit Modal --}}
                     @include('partials.task.form_task', [
                         'route' => 'task.edit',
@@ -204,7 +202,27 @@
     @else
         <p class="text-center opacity-50 my-5">Não existem tarefas registradas</p>
     @endif
+    {{-- Include Stopwatch Modal --}}
+    @include('partials.task.modal_stopwatch_task', [
+        'list_name' => $list_name,
+    ])
 </div>
+<script type="module">
+    import { main } from "{{ asset('assets/scripts/timer.mjs') }}"
+
+    main({
+        endpoint: {
+            getTaskTime: (taskId) => `{{ route('getTask') }}?task_id=${taskId}`,
+            checkForStartedTask: (taskId) => `{{ route('checkForStartedTask') }}?task_id=${taskId}`,
+            updateElapsedTimeTask: `{{ route('updateElapsedTime') }}`,
+            startTask: `{{ route('startTask') }}`,
+            pauseTask: `{{ route('pauseTask') }}`,
+            taskWithListSearch: `{{ route('taskWithList.search', $listIdGlobal) }}`,
+            taskShow: `{{ route('task.show') }}`,
+        },
+        listName: "{{ $list_name }}",
+    })
+</script>
 
 <script>
     const filter = document.querySelector('#filter')
